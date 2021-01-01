@@ -1,14 +1,17 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sonar-postgres
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: sonar-postgres
   template:
     metadata:
       name: sonar-postgres
       labels:
-        name: sonar-postgres
+        app: sonar-postgres
     spec:
       containers:
         - image: postgres:9.6.5

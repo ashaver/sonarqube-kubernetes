@@ -1,19 +1,20 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sonar
 spec:
+  selector:
+      matchLabels:
+        app: sonar
   replicas: 1
   template:
     metadata:
       name: sonar
       labels:
-        name: sonar
+        app: sonar
     spec:
       containers:
-        - image: sonarqube:6.5
-          args:
-            - -Dsonar.web.context=/sonar
+        - image: sonarqube:latest
           name: sonar
           env:
             - name: SONARQUBE_JDBC_PASSWORD
@@ -23,6 +24,14 @@ spec:
                   key: password
             - name: SONARQUBE_JDBC_URL
               value: jdbc:postgresql://sonar-postgres:5432/sonar
+            - name: SONARQUBE_JDBC_USERNAME
+              value: sonar
           ports:
             - containerPort: 9000
               name: sonar
+      initContainers:
+        - name: sysctl
+          image: busybox:1.28
+          securityContext:
+            privileged: true
+          command: ['sh', '-c', 'sysctl -w vm.max_map_count=262144; sysctl -w fs.file-max=65536; ulimit -n 65536; ulimit -u 4096']
